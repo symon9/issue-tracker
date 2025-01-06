@@ -43,9 +43,7 @@ const NewIssuePage = () => {
         })}
         className="space-y-3"
       >
-        <TextField.Root>
-          <TextField.Input placeholder="Title" {...register("title")} />
-        </TextField.Root>
+        <TextField.Root placeholder="Title" {...register("title")} />
         {errors.title && (
           <Text color="red" as="p">
             {errors.title.message}
