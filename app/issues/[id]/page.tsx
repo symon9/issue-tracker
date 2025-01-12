@@ -5,9 +5,6 @@ import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { Pencil2Icon } from "@radix-ui/react-icons";
 import Link from "next/link";
-// TODO: npm i react-markdown@8.0.7
-// TODO: npm i -D @tailwindcss/typography
-// TODO: npm i @radix-ui/react-icons
 
 interface Props {
   params: { id: string };
