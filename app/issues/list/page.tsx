@@ -7,7 +7,7 @@ import NextLink from "next/link";
 import { ArrowUpIcon } from "@radix-ui/react-icons";
 
 interface Props {
-  searchParams: { status: Status; orderBy: keyof Issue };
+  searchParams: { status: Status, orderBy: keyof Issue };
 }
 
 const IssuesPage = async ({ searchParams }: Props) => {
