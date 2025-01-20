@@ -9,7 +9,7 @@ import DeleteIssueButton from "./DeleteIssueButton";
 import EditIssueButton from "./EditIssueButton";
 import IssueDetails from "./IssueDetails";
 
-interface Props extends PageProps{
+interface Props{
   params: { id: string };
 }
 
@@ -21,7 +21,7 @@ const fetchUser = cache((issueId: number) =>
 
 const IssueDetailPage = async ({ params }: Props) => {
   const session = await getServerSession(authOptions);
-  const issue = await fetchUser(parseInt(params.id, 10));
+  const issue = await fetchUser(parseInt(params.id));
 
   if (!issue) notFound();
 
@@ -44,7 +44,7 @@ const IssueDetailPage = async ({ params }: Props) => {
 };
 
 export async function generateMetadata({ params }: Props) {
-  const issue = await fetchUser(parseInt(params.id, 10));
+  const issue = await fetchUser(parseInt(params.id));
 
   return {
     title: issue?.title,
