@@ -21,26 +21,21 @@ const fetchUser = cache((issueId: number) =>
 
 const IssueDetailPage = async ({ params }: Props) => {
   const session = await getServerSession(authOptions);
-  const paramsAwaited = await params;
-  const issue = await fetchUser(parseInt(paramsAwaited.id));
+  if (!session) return notFound();
 
-  if (!issue) notFound();
+  const issueId = parseInt(params.id);
+  if (isNaN(issueId)) return notFound();
+
+  const issue = await fetchUser(issueId);
+  if (!issue) return notFound();
 
   return (
-    <Grid columns={{ initial: "1", sm: "5" }} gap="5">
-      <Box className="md:col-span-4">
-        <IssueDetails issue={issue} />
-      </Box>
-      {session && (
-        <Box>
-          <Flex direction="column" gap="4">
-            <AssigneeSelect issue={issue} />
-            <EditIssueButton issueId={issue.id} />
-            <DeleteIssueButton issueId={issue.id} />
-          </Flex>
-        </Box>
-      )}
-    </Grid>
+    <Flex direction="column" gap="3">
+      <IssueDetails issue={issue} />
+      <AssigneeSelect issue={issue} />
+      <EditIssueButton issueId={issue.id} />
+      <DeleteIssueButton issueId={issue.id} />
+    </Flex>
   );
 };
 
