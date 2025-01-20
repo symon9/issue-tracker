@@ -3,7 +3,6 @@ import { patchIssueSchema } from "@/app/validationSchema";
 import prisma from "@/prisma/client";
 import { getServerSession } from "next-auth";
 import { NextResponse, NextRequest } from "next/server";
-import { NextApiRequest, NextApiResponse } from 'next';
 
 export async function PATCH(
   request: NextRequest,
@@ -45,23 +44,22 @@ export async function PATCH(
   return NextResponse.json(updatedIssue);
 }
 
-export async function DELETE(
-  request: NextApiRequest,
-  response: NextApiResponse
-) {
+export async function DELETE(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session) return response.status(301).json({});
+  if (!session) return NextResponse.redirect('/login');
 
-  const { id } = request.query;
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  if (!id) return NextResponse.json({ error: "Invalid issue" }, { status: 404 });
+
   const issue = await prisma.issue.findUnique({
-    where: { id: parseInt(id as string) },
+    where: { id: parseInt(id) },
   });
-  if (!issue)
-    return response.status(404).json({ error: "Invalid issue" });
+  if (!issue) return NextResponse.json({ error: "Invalid issue" }, { status: 404 });
 
   await prisma.issue.delete({
     where: { id: issue.id },
   });
 
-  return response.status(200).json({});
+  return NextResponse.json({}, { status: 200 });
 }
