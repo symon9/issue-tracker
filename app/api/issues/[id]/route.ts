@@ -2,10 +2,10 @@ import authOptions from "@/app/auth/authOptions";
 import { patchIssueSchema } from "@/app/validationSchema";
 import prisma from "@/prisma/client";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
 export async function PATCH(
-  request: NextResponse,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
@@ -45,7 +45,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: NextResponse,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
