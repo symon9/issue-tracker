@@ -9,7 +9,7 @@ import DeleteIssueButton from "./DeleteIssueButton";
 import EditIssueButton from "./EditIssueButton";
 import IssueDetails from "./IssueDetails";
 
-interface Props {
+interface Props extends PageProps{
   params: { id: string };
 }
 
