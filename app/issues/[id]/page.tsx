@@ -21,7 +21,7 @@ const fetchUser = cache((issueId: number) =>
 
 const IssueDetailPage = async ({ params }: Props) => {
   const session = await getServerSession(authOptions);
-  const issue = await fetchUser(parseInt(params.id)); // No need to await params here
+  const issue = await fetchUser(parseInt(params.id, 10));
 
   if (!issue) notFound();
 
@@ -44,7 +44,7 @@ const IssueDetailPage = async ({ params }: Props) => {
 };
 
 export async function generateMetadata({ params }: Props) {
-  const issue = await fetchUser(parseInt(params.id)); // No need to await params here
+  const issue = await fetchUser(parseInt(params.id, 10));
 
   return {
     title: issue?.title,
