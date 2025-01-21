@@ -9,7 +9,7 @@ const IssueForm = dynamic(() => import("../../_components/IssueForm"), {
 });
 
 interface Props {
-  params: { id: string };
+  params: any;
 }
 
 const EditIssuePage = async ({ params }: Props) => {

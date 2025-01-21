@@ -10,7 +10,7 @@ import EditIssueButton from "./EditIssueButton";
 import IssueDetails from "./IssueDetails";
 
 interface Props {
-  params: { id: string };
+  params: any;
 }
 
 const fetchUser = cache((issueId: number) =>
