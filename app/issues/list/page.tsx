@@ -7,11 +7,12 @@ import { Flex } from "@radix-ui/themes";
 import { Metadata } from "next";
 
 interface Props {
-  searchParams: IssueQuery;
+  searchParams: Promise<IssueQuery>;
 }
 
 const IssuesPage = async ({ searchParams }: Props) => {
-  const { status, orderBy, page } = searchParams;
+  const resolvedSearchParams = await searchParams;
+  const { status, orderBy, page } = resolvedSearchParams;
 
   const statuses = Object.values(Status);
   const validStatus = statuses.includes(status as Status) ? status : undefined;
@@ -38,7 +39,7 @@ const IssuesPage = async ({ searchParams }: Props) => {
   return (
     <Flex direction="column" gap="3">
       <IssueActions />
-      <IssueTable searchP={searchParams} issues={issues} />
+      <IssueTable searchP={resolvedSearchParams} issues={issues} />
       <Pagination
         pageSize={pageSize}
         currentPage={currentPage}
