@@ -11,26 +11,25 @@ interface Props {
 }
 
 const IssuesPage = async ({ searchParams }: Props) => {
-  const searchP = await searchParams;
+  const { status, orderBy, page } = searchParams;
 
   const statuses = Object.values(Status);
-  const status = statuses.includes(searchP.status as Status)
-    ? searchP.status
-    : undefined;
-  const where = { status };
+  const validStatus = statuses.includes(status as Status) ? status : undefined;
 
-  const orderBy =
-    searchP.orderBy && columnNames.includes(searchP.orderBy)
-      ? { [searchP.orderBy]: "asc" }
+  const where = { status: validStatus };
+
+  const orderByClause =
+    orderBy && columnNames.includes(orderBy)
+      ? { [orderBy]: "asc" }
       : undefined;
 
-  const page = parseInt(searchP.page) || 1;
+  const currentPage = parseInt(page) || 1;
   const pageSize = 10;
 
   const issues = await prisma.issue.findMany({
     where,
-    orderBy,
-    skip: (page - 1) * pageSize,
+    orderBy: orderByClause,
+    skip: (currentPage - 1) * pageSize,
     take: pageSize,
   });
 
@@ -39,16 +38,17 @@ const IssuesPage = async ({ searchParams }: Props) => {
   return (
     <Flex direction="column" gap="3">
       <IssueActions />
-      <IssueTable searchP={searchP} issues={issues} />
+      <IssueTable searchP={searchParams} issues={issues} />
       <Pagination
         pageSize={pageSize}
-        currentPage={page}
+        currentPage={currentPage}
         itemCount={issueCount}
       />
     </Flex>
   );
 };
 
+// Force dynamic rendering for this page
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
