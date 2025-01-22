@@ -5,7 +5,13 @@ import IssueSummary from "./IssueSummary";
 import LatestIssues from "./LatestIssues";
 import { Metadata } from "next";
 
-export default function Home({ open, inProgress, closed }) {
+export default async function Home() {
+  const open = await prisma.issue.count({ where: { status: "OPEN" } });
+  const closed = await prisma.issue.count({ where: { status: "CLOSED" } });
+  const inProgress = await prisma.issue.count({
+    where: { status: "IN_PROGRESS" },
+  });
+
   return (
     <Grid columns={{ initial: "1", md: "2" }} gap="5">
       <Flex direction="column" gap="5">
@@ -17,17 +23,8 @@ export default function Home({ open, inProgress, closed }) {
   );
 }
 
-export async function getServerSideProps() {
-  const open = await prisma.issue.count({ where: { status: "OPEN" } });
-  const closed = await prisma.issue.count({ where: { status: "CLOSED" } });
-  const inProgress = await prisma.issue.count({
-    where: { status: "IN_PROGRESS" },
-  });
-
-  return {
-    props: { open, inProgress, closed },
-  };
-}
+// Force dynamic rendering for this page
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Issue Tracker - Dashboard",
