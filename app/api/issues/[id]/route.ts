@@ -1,44 +1,61 @@
 import authOptions from "@/app/auth/authOptions";
-import { patchIssueSchema } from "@/app/validationSchema";
+import { patchIssueSchema } from "@/app/validationSchemas";
 import prisma from "@/prisma/client";
 import { getServerSession } from "next-auth";
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function PATCH(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
-  }
-
-  // Extract the `id` from the URL path
-  const urlParts = request.nextUrl.pathname.split('/');
-  const id = urlParts[urlParts.length - 1];
-  if (!id || isNaN(parseInt(id, 10))) {
-    return NextResponse.json({ error: 'Invalid issue ID' }, { status: 400 });
-  }
-
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { title, description, assignedToUserId } = await request.json();
-
-    if (!title || !description || !assignedToUserId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    // Check if the user is authenticated
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized access" },
+        { status: 401 }
+      );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: assignedToUserId },
-    });
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid assigned user ID' }, { status: 400 });
+    // Parse and validate the request body
+    const body = await request.json();
+    console.log("Request body:", body);
+
+    const validation = patchIssueSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(validation.error.format(), { status: 400 });
     }
 
-    // Check if the issue exists
+    const { assignedToUserId, title, description } = body;
+
+    // Validate assignedToUserId if provided
+    if (assignedToUserId) {
+      const user = await prisma.user.findUnique({
+        where: { id: assignedToUserId },
+      });
+      if (!user) {
+        return NextResponse.json(
+          { error: "Invalid assigned user ID" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate issue existence
+    const issueId = parseInt(params.id, 10);
+    if (isNaN(issueId)) {
+      return NextResponse.json({ error: "Invalid issue ID" }, { status: 400 });
+    }
+
     const issue = await prisma.issue.findUnique({
-      where: { id: parseInt(id, 10) },
+      where: { id: issueId },
     });
     if (!issue) {
-      return NextResponse.json({ error: 'Issue not found' }, { status: 404 });
+      return NextResponse.json({ error: "Issue not found" }, { status: 404 });
     }
 
+    // Update the issue in the database
     const updatedIssue = await prisma.issue.update({
       where: { id: issue.id },
       data: {
@@ -48,10 +65,15 @@ export async function PATCH(request: NextRequest) {
       },
     });
 
+    console.log("Updated issue:", updatedIssue);
+
     return NextResponse.json(updatedIssue, { status: 200 });
   } catch (error) {
-    console.error('Error updating issue:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Error in PATCH handler:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
