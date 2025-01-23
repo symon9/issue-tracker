@@ -4,10 +4,7 @@ import prisma from "@/prisma/client";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest) {
   try {
     // Check if the user is authenticated
     const session = await getServerSession(authOptions);
@@ -18,11 +15,16 @@ export async function PATCH(
       );
     }
 
+    // Extract the issue ID from the URL
+    const id = request.nextUrl.pathname.split("/").pop();
+    if (!id || isNaN(parseInt(id, 10))) {
+      return NextResponse.json({ error: "Invalid issue ID" }, { status: 400 });
+    }
+
     // Parse and validate the request body
     const body = await request.json();
-    console.log("Request body:", body);
-
     const validation = patchIssueSchema.safeParse(body);
+
     if (!validation.success) {
       return NextResponse.json(validation.error.format(), { status: 400 });
     }
@@ -42,14 +44,9 @@ export async function PATCH(
       }
     }
 
-    // Validate issue existence
-    const issueId = parseInt(params.id, 10);
-    if (isNaN(issueId)) {
-      return NextResponse.json({ error: "Invalid issue ID" }, { status: 400 });
-    }
-
+    // Validate if the issue exists
     const issue = await prisma.issue.findUnique({
-      where: { id: issueId },
+      where: { id: parseInt(id, 10) },
     });
     if (!issue) {
       return NextResponse.json({ error: "Issue not found" }, { status: 404 });
@@ -57,15 +54,13 @@ export async function PATCH(
 
     // Update the issue in the database
     const updatedIssue = await prisma.issue.update({
-      where: { id: issue.id },
+      where: { id: parseInt(id, 10) },
       data: {
         title,
         description,
         assignedToUserId,
       },
     });
-
-    console.log("Updated issue:", updatedIssue);
 
     return NextResponse.json(updatedIssue, { status: 200 });
   } catch (error) {
