@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(request: NextRequest) {
   try {
-    // Check if the user is authenticated
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json(
@@ -31,7 +30,6 @@ export async function PATCH(request: NextRequest) {
 
     const { assignedToUserId, title, description } = body;
 
-    // Validate assignedToUserId if provided
     if (assignedToUserId) {
       const user = await prisma.user.findUnique({
         where: { id: assignedToUserId },
@@ -44,7 +42,6 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    // Validate if the issue exists
     const issue = await prisma.issue.findUnique({
       where: { id: parseInt(id, 10) },
     });
@@ -52,7 +49,6 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Issue not found" }, { status: 404 });
     }
 
-    // Update the issue in the database
     const updatedIssue = await prisma.issue.update({
       where: { id: parseInt(id, 10) },
       data: {
