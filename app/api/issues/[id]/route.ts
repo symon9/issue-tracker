@@ -20,7 +20,6 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Invalid issue ID" }, { status: 400 });
     }
 
-    // Parse and validate the request body
     const body = await request.json();
     const validation = patchIssueSchema.safeParse(body);
 
